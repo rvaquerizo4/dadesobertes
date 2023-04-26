@@ -1,19 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mapa de biblioteques de Barcelona</title>
-  <link rel="stylesheet" href="https://openlayers.org/en/v6.5.0/css/ol.css" type="text/css">
-  <script src="https://openlayers.org/en/v6.5.0/build/ol.js"></script>
-  <style>
-    #map {
-      height: 400px;
-      width: 100%;
-    }
-  </style>
+    <title>Mapa de biblioteques de Barcelona</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
 </head>
 <body>
-  <div id="map"></div>
+    <div id="mapid" style="height: 600px;"></div>
+    <script>
+        var map = L.map('mapid').setView([41.3870154, 2.1700471], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+        }).addTo(map);
 
-  <script src="index.js"></script>
+        fetch('https://do.diba.cat/api/dataset/biblioteques')
+            .then(response => response.json())
+            .then(data => {
+                var biblioteques = data.elements;
+                console.log(biblioteques);
+                biblioteques.forEach(biblioteca => {
+                    var latlng = biblioteca.localitzacio.split(",");
+                    var lat = latlng[0];
+                    var lng = latlng[1];
+                    L.marker([lat, lng])
+                        .addTo(map)
+                        .bindPopup(`
+                            <h2>${biblioteca.adreca_nom}</h2>
+                            <p>descripcio: ${biblioteca.descripcio}</p>
+                            <p>director: ${biblioteca.director}</p>
+                        `);
+                });
+            });
+    </script>
 </body>
 </html>
+
